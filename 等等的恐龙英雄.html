@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>等等的恐龙英雄大救援</title>
+  <style>
+    :root { --ink:#19304b; --blue:#4dcbff; --yellow:#ffd34d; --pink:#ff5d83; --green:#55d58a; }
+    * { box-sizing:border-box; }
+    body {
+      min-height:100vh; margin:0; color:var(--ink); font-family:"PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      background:radial-gradient(circle at 16% 10%, #fff8c7 0 8%, transparent 9%), linear-gradient(160deg, #76d9ff, #8575ed 67%, #553baf);
+      display:grid; place-items:center; padding:22px;
+    }
+    .game-shell { width:min(100%, 780px); filter:drop-shadow(0 18px 32px rgba(26, 22, 84, .30)); }
+    .topbar {
+      display:flex; gap:12px; justify-content:space-between; align-items:center; padding:12px 20px;
+      background:#fffaf0; border:4px solid #fff; border-radius:24px 24px 0 0; font-weight:800;
+    }
+    .title { font-size:clamp(19px, 3vw, 27px); letter-spacing:.02em; }
+    .pill { background:#eaf6ff; border:2px solid #b8e4ff; padding:7px 12px; border-radius:999px; white-space:nowrap; }
+    .game {
+      position:relative; overflow:hidden; height:min(65vh, 510px); min-height:430px; border:5px solid #fff;
+      background:linear-gradient(#75dbff 0 63%, #b0eb7b 63% 100%); touch-action:none;
+    }
+    .cloud { position:absolute; color:#fff; opacity:.85; font-size:44px; animation:float 8s ease-in-out infinite; user-select:none; }
+    .cloud.one { left:9%; top:9%; } .cloud.two { right:11%; top:21%; animation-delay:-4s; font-size:32px; }
+    @keyframes float { 50% { transform:translateX(26px) translateY(-6px); } }
+    .mountain { position:absolute; bottom:35%; width:0; height:0; border-left:110px solid transparent; border-right:110px solid transparent; border-bottom:155px solid #7460c7; opacity:.9; }
+    .mountain.a { left:-34px; } .mountain.b { right:-45px; border-bottom-color:#6650af; transform:scale(.78); transform-origin:bottom; }
+    .bush { position:absolute; bottom:31%; font-size:56px; filter:drop-shadow(0 5px 0 #66b55e); user-select:none; }
+    .bush.a{ left:9%; } .bush.b{right:9%; transform:scaleX(-1);}
+    #player {
+      position:absolute; left:calc(50% - 45px); bottom:34px; width:90px; height:100px; z-index:3; text-align:center;
+      transition:left .08s linear; user-select:none;
+    }
+    .cape { position:absolute; right:-9px; top:24px; width:35px; height:48px; background:var(--pink); border-radius:10px 2px 18px 20px; transform:rotate(-16deg); z-index:-1; }
+    .dino { font-size:78px; line-height:1; filter:drop-shadow(0 6px 0 rgba(37,100,54,.2)); }
+    .hero-name { display:inline-block; margin-top:-7px; padding:2px 8px; background:white; border-radius:20px; font-size:14px; font-weight:900; box-shadow:0 2px 0 #bfd2dc; }
+    .item { position:absolute; z-index:2; font-size:42px; line-height:1; user-select:none; will-change:transform; }
+    .hud { position:absolute; top:13px; left:15px; right:15px; display:flex; justify-content:space-between; align-items:center; z-index:5; font-weight:900; }
+    .score { background:rgba(255,255,255,.92); padding:8px 13px; border-radius:999px; font-size:18px; box-shadow:0 3px 0 rgba(50,96,122,.16); }
+    .goal { background:#fff2a8; padding:8px 13px; border-radius:999px; box-shadow:0 3px 0 rgba(175,137,24,.18); }
+    .start-card, .end-card {
+      position:absolute; inset:0; z-index:10; display:grid; place-items:center; padding:28px; background:rgba(28, 30, 103, .26); text-align:center;
+    }
+    .card { max-width:420px; padding:27px 25px 23px; background:#fffdf7; border:5px solid #fff; border-radius:29px; box-shadow:0 12px 0 rgba(45,42,112,.25); }
+    .card .icon { font-size:58px; margin-bottom:4px; } h1 { margin:0 0 10px; font-size:28px; } p { margin:6px 0 18px; line-height:1.55; font-weight:700; }
+    button { appearance:none; border:0; cursor:pointer; padding:13px 22px; color:#183448; background:var(--yellow); font:900 19px inherit; border-radius:999px; box-shadow:0 5px 0 #d49e21; transition:transform .1s, box-shadow .1s; }
+    button:hover { transform:translateY(-2px); } button:active { transform:translateY(4px); box-shadow:0 1px 0 #d49e21; }
+    .hidden { display:none; }
+    .footer { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:13px 18px 17px; background:#fffaf0; border:4px solid #fff; border-top:0; border-radius:0 0 24px 24px; font-weight:750; }
+    .help { font-size:14px; }
+    .controls { display:flex; gap:10px; }
+    .control { min-width:55px; padding:9px 15px; font-size:22px; box-shadow:0 4px 0 #c6c2df; background:#e7e6ff; }
+    @media (max-width:530px) { body { padding:8px; } .game { min-height:440px; } .topbar { padding:11px 13px; } .footer { padding:11px 12px 15px; } .help { max-width:190px; } .dino { font-size:70px; } }
+  </style>
+</head>
+<body>
+  <main class="game-shell" aria-label="等等的恐龙英雄大救援">
+    <section class="topbar">
+      <div class="title">🦖 等等的恐龙英雄大救援</div>
+      <div class="pill">陈言曦 · 小小英雄</div>
+    </section>
+    <section class="game" id="game" aria-label="游戏区域">
+      <div class="cloud one">☁️</div><div class="cloud two">☁️</div>
+      <div class="mountain a"></div><div class="mountain b"></div>
+      <div class="bush a">🌳</div><div class="bush b">🌳</div>
+      <div class="hud"><div class="score">⭐ 能量星：<span id="score">0</span> / 10</div><div class="goal">接星星，躲陨石！</div></div>
+      <div id="player" aria-label="恐龙英雄等等"><div class="cape"></div><div class="dino">🦖</div><div class="hero-name">等等</div></div>
+      <div id="start" class="start-card"><div class="card"><div class="icon">🦖🦸⭐</div><h1>恐龙王国需要你！</h1><p>移动英雄等等，接住 <b>10 颗能量星</b>。<br>小心从天而降的陨石！</p><button id="startButton">开始救援！</button></div></div>
+      <div id="end" class="end-card hidden"><div class="card"><div id="endIcon" class="icon">🎉</div><h1 id="endTitle">太棒了！</h1><p id="endText"></p><button id="restartButton">再玩一次</button></div></div>
+    </section>
+    <section class="footer"><div class="help">电脑：← → 方向键　手机：按下按钮或在游戏内左右滑动</div><div class="controls"><button class="control" id="leftButton" aria-label="向左移动">←</button><button class="control" id="rightButton" aria-label="向右移动">→</button></div></section>
+  </main>
+  <script>
+    (() => {
+      const game = document.querySelector('#game'), player = document.querySelector('#player');
+      const scoreEl = document.querySelector('#score'), start = document.querySelector('#start'), end = document.querySelector('#end');
+      const startButton = document.querySelector('#startButton'), restartButton = document.querySelector('#restartButton');
+      const leftButton = document.querySelector('#leftButton'), rightButton = document.querySelector('#rightButton');
+      const endIcon = document.querySelector('#endIcon'), endTitle = document.querySelector('#endTitle'), endText = document.querySelector('#endText');
+      let running = false, score = 0, playerX = 0.5, lastTime = 0, spawnClock = 0, dangerClock = 0, items = [];
+      const clamp = (num, min, max) => Math.max(min, Math.min(max, num));
+      function reset() { items.forEach(item => item.el.remove()); items=[]; score=0; scoreEl.textContent=score; playerX=.5; positionPlayer(); spawnClock=0; dangerClock=0; }
+      function positionPlayer() { const width = game.clientWidth; player.style.left = `${clamp(playerX * width - 45, 0, width - 90)}px`; }
+      function addItem(type) { const el = document.createElement('div'); el.className='item'; el.textContent=type === 'star' ? '⭐' : '☄️'; const x=.06 + Math.random()*.84; const speed=(type === 'star' ? 145 : 175) + Math.random()*65; el.style.left=`${x*100}%`; el.style.top='-52px'; game.append(el); items.push({el,type,x,y:-52,speed}); }
+      function overlap(a, b) { return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top; }
+      function finish(won) { running=false; endIcon.textContent=won?'🏆🎉':'💫'; endTitle.textContent=won?'救援成功！':'差一点点！'; endText.innerHTML=won?'等等（陈言曦）收集齐了 10 颗能量星！<br>恐龙王国得救啦！':'陨石碰到了等等，不过英雄从不放弃。<br>再试一次吧！'; end.classList.remove('hidden'); }
+      function tick(time) {
+        if (!running) return;
+        const dt = Math.min((time-lastTime)/1000, .05); lastTime=time; spawnClock += dt; dangerClock += dt;
+        if (spawnClock > .75) { addItem('star'); spawnClock=0; }
+        if (dangerClock > 1.6) { addItem('rock'); dangerClock=0; }
+        const playerBox = player.getBoundingClientRect();
+        for (let i=items.length-1;i>=0;i--) { const item=items[i]; item.y += item.speed*dt; item.el.style.transform=`translateY(${item.y}px) rotate(${item.y*.2}deg)`; const itemBox=item.el.getBoundingClientRect();
+          if (overlap(playerBox, itemBox)) { item.el.remove(); items.splice(i,1); if(item.type==='star') { score++; scoreEl.textContent=score; if(score>=10) { finish(true); break; } } else { finish(false); break; } }
+          else if(item.y > game.clientHeight+45) { item.el.remove(); items.splice(i,1); }
+        }
+        requestAnimationFrame(tick);
+      }
+      function move(amount) { if (!running) return; playerX=clamp(playerX+amount, .055, .945); positionPlayer(); }
+      function begin() { reset(); start.classList.add('hidden'); end.classList.add('hidden'); running=true; lastTime=performance.now(); requestAnimationFrame(tick); }
+      document.addEventListener('keydown', event => { if (event.key==='ArrowLeft') { event.preventDefault(); move(-.075); } if(event.key==='ArrowRight') { event.preventDefault(); move(.075); } });
+      [['pointerdown', -.09, leftButton], ['pointerdown', .09, rightButton]].forEach(([name, amount, button]) => button.addEventListener(name, event => { event.preventDefault(); move(amount); }));
+      let dragStart=null;
+      game.addEventListener('pointerdown', event => { dragStart=event.clientX; });
+      game.addEventListener('pointermove', event => { if(dragStart!==null && running) { const delta=(event.clientX-dragStart)/game.clientWidth; playerX=clamp(playerX+delta, .055, .945); dragStart=event.clientX; positionPlayer(); } });
+      game.addEventListener('pointerup', () => dragStart=null); game.addEventListener('pointercancel', () => dragStart=null);
+      window.addEventListener('resize', positionPlayer); startButton.addEventListener('click', begin); restartButton.addEventListener('click', begin); positionPlayer();
+    })();
+  </script>
+</body>
+</html>
